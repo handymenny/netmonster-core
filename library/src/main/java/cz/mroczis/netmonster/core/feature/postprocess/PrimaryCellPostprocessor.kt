@@ -11,6 +11,8 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
  */
 class PrimaryCellPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.PRIMARY_CELL_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         if (list.firstOrNull { it.connectionStatus is PrimaryConnection } != null) {
             list

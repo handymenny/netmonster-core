@@ -13,6 +13,8 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
  */
 class CdmaPlmnPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.CDMA_PLMN_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> {
         val subToNetwork =
             list.groupBy { it.subscriptionId }

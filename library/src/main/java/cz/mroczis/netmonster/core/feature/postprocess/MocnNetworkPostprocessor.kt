@@ -27,6 +27,8 @@ class MocnNetworkPostprocessor(
     private val networkOperatorGetter: (subId: Int) -> Network?
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.MOCN_NETWORK_POSTPROCESSOR
+
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun postprocess(list: List<ICell>): List<ICell> {
         val subscriptions = subscription.getActiveSubscriptionIds()

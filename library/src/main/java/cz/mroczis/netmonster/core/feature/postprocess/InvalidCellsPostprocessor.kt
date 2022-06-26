@@ -16,6 +16,8 @@ import cz.mroczis.netmonster.core.util.isSamsung
  */
 class InvalidCellsPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.INVALID_CELLS_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> = list.toMutableList().asSequence()
         // Google Pixel phones in LTE use this to say that cell is nearby but it's data will appear in a near future
         .filterNot { it is CellLte && it.pci == 0 && it.signal.rssi == -51 && it.signal.rsrp == null && it.signal.rsrq == null }
