@@ -8,6 +8,11 @@ import cz.mroczis.netmonster.core.model.cell.ICell
 interface ICellPostprocessor {
 
     /**
+     *  Unique identifier
+     */
+    val id: CellPostprocessor
+
+    /**
      * Postprocessing method that allows data modification within the list
      */
     fun postprocess(list: List<ICell>) : List<ICell>

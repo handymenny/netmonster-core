@@ -20,6 +20,8 @@ class TimingAdvancePostprocessor(
     private val wasValidTaDetected: (id: SubscriptionId) -> Boolean,
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.TIMINIG_ADVANCE_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         list.map { cell ->
             if (cell is CellLte) {

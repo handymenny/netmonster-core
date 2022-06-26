@@ -28,6 +28,8 @@ class SubDuplicitiesPostprocessor(
     private val networkOperatorGetter: (subId: SubscriptionId) -> Network?
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.SUB_DUPLICITIES_POSTPROCESSOR
+
     @RequiresPermission(allOf = [Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun postprocess(list: List<ICell>): List<ICell> =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

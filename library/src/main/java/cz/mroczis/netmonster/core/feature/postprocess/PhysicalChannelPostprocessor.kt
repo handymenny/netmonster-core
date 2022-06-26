@@ -31,6 +31,8 @@ class PhysicalChannelPostprocessor(
     private val physicalChannelConfigGetter: (Int) -> List<PhysicalChannelConfig>
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.PHYSICAL_CHANNEL_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             list.groupBy { it.subscriptionId }

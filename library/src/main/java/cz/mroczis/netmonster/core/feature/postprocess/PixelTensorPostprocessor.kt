@@ -10,6 +10,8 @@ import cz.mroczis.netmonster.core.model.signal.SignalGsm
  */
 class PixelTensorPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.PIXEL_TENSOR_POSTPROCESSOR
+
     private val isTensorPixel = Build.PRODUCT.lowercase() in GOOGLE_TENSOR_DEVICES
 
     override fun postprocess(list: List<ICell>): List<ICell> =

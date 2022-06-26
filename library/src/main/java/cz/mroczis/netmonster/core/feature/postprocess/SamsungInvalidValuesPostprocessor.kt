@@ -14,6 +14,8 @@ import cz.mroczis.netmonster.core.util.isSamsung
  */
 class SamsungInvalidValuesPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.SAMSUNG_INVALID_VALUES_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         if (isSamsung()) {
             list.map {

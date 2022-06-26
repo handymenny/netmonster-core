@@ -23,6 +23,8 @@ class CellBandwidthPostprocessor(
     private val isEnabled: () -> Boolean,
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.CELL_BANDWIDTH_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             if (list.any { (it is CellLte) && it.bandwidth != null }) {

@@ -35,6 +35,8 @@ class SamsungEndiannessPostprocessor(
     private val isEnabled: () -> Boolean,
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.SAMSUNG_ENDIANNESS_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         if (isSamsung() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             list.map { cell ->

@@ -13,6 +13,8 @@ import cz.mroczis.netmonster.core.model.connection.SecondaryConnection
  */
 class InvalidSecondaryCellsPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.INVALID_SECONDARY_CELLS_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         list.groupBy { it.subscriptionId }.flatMap { (_, cells) ->
             val invalid = list.all { it.connectionStatus is PrimaryConnection || (it.connectionStatus as? SecondaryConnection)?.isGuess == false }
