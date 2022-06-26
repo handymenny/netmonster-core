@@ -9,6 +9,7 @@ import cz.mroczis.netmonster.core.db.model.NetworkType
 import cz.mroczis.netmonster.core.feature.detect.*
 import cz.mroczis.netmonster.core.feature.config.*
 import cz.mroczis.netmonster.core.feature.merge.CellSource
+import cz.mroczis.netmonster.core.feature.postprocess.CellPostprocessor
 import cz.mroczis.netmonster.core.model.annotation.SinceSdk
 import cz.mroczis.netmonster.core.model.annotation.TillSdk
 import cz.mroczis.netmonster.core.model.cell.ICell
@@ -59,6 +60,29 @@ interface INetMonster {
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
     fun getCells(vararg sources: CellSource): List<ICell>
+
+    /**
+     * Retrieves data from all of specified [sources] and then
+     * merges them into one list applying the specified [postprocessors]
+     *
+     * Resulting list contains only unique cells from selected [sources].
+     * Note that some sources might not return valid data depending on
+     * current SDK version.
+     *
+     * If no source is passed then you'll always get an empty list
+     *
+     *
+     * For more information see documentation of each method that might be involved:
+     *
+     * @see ITelephonyManagerCompat.getCellLocation
+     * @see ITelephonyManagerCompat.getNeighboringCellInfo
+     * @see ITelephonyManagerCompat.getAllCellInfo
+     */
+    @WorkerThread
+    @RequiresPermission(
+        allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
+    )
+    fun getCells(vararg sources: CellSource, postprocessors: List<CellPostprocessor>): List<ICell>
 
 
     /**
