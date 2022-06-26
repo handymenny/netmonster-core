@@ -81,7 +81,15 @@ internal class NetMonster(
     @RequiresPermission(
         allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
     )
-    override fun getCells(vararg sources: CellSource): List<ICell> {
+    override fun getCells(vararg sources: CellSource): List<ICell> = getCells(
+       *sources, postprocessors = CellPostprocessor.values().toList()
+    )
+
+    @WorkerThread
+    @RequiresPermission(
+        allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.READ_PHONE_STATE]
+    )
+    override fun getCells(vararg sources: CellSource, postprocessors: List<CellPostprocessor>): List<ICell> {
         val subscriptions = subscription.getActiveSubscriptionIds()
         val oldApi = mutableListOf<ICell>().apply {
             if (sources.contains(CellSource.CELL_LOCATION)) {
@@ -106,7 +114,11 @@ internal class NetMonster(
                 getTelephony(subId).getAllCellInfo()
             }.flatten().toSet().toList()
 
-            postprocessors.forEach { allCells = it.postprocess(allCells) }
+            this.postprocessors.filter {
+                postprocessors.contains(it.id)
+            }.forEach {
+                allCells = it.postprocess(allCells)
+            }
             allCells
         } else emptyList()
 
