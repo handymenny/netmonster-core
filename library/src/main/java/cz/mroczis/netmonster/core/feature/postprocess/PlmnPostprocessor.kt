@@ -10,6 +10,8 @@ import cz.mroczis.netmonster.core.model.connection.IConnection
  */
 class PlmnPostprocessor : ICellPostprocessor {
 
+    override val id = CellPostprocessor.PLMN_POSTPROCESSOR
+
     private val plmnExtractor = PlmnExtractor()
 
     override fun postprocess(list: List<ICell>): List<ICell> {

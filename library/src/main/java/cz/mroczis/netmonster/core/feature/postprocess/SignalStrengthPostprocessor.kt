@@ -23,6 +23,8 @@ class SignalStrengthPostprocessor(
     private val pairedCellGetter: (Int) -> ICell?
 ) : ICellPostprocessor {
 
+    override val id = CellPostprocessor.SIGNAL_STRENGTH_POSTPROCESSOR
+
     override fun postprocess(list: List<ICell>): List<ICell> =
         list.toMutableList().map {cell ->
             if (cell.connectionStatus is PrimaryConnection) {
