@@ -2,16 +2,22 @@ package cz.mroczis.netmonster.sample
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.telephony.ServiceState
 import android.util.Log
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
+import cz.mroczis.netmonster.core.feature.merge.CellSource
+import cz.mroczis.netmonster.core.feature.postprocess.CellPostprocessor
+import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 
 /**
@@ -35,6 +41,9 @@ class MainActivity : AppCompatActivity() {
         with(binding) {
             setContentView(root)
             recycler.adapter = adapter
+        }
+        findViewById<Button>(R.id.search_button).setOnClickListener {
+            onShare()
         }
     }
 
@@ -75,4 +84,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun onShare() {
+        val shareText = Intent(Intent.ACTION_SEND)
+        shareText.type = "text/plain"
+        shareText.putExtra(Intent.EXTRA_SUBJECT, "netcore")
+        shareText.putExtra(Intent.EXTRA_TEXT, getDataToShare())
+        startActivity(Intent.createChooser(shareText, "Share"))
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getDataToShare(): String {
+        val context = this
+        var dataToShare = "NetmonsterPostProcess\n${
+            adapter.data.joinToString(separator = "\n")
+        }"
+        val subscriptions = NetMonsterFactory.getSubscription(context).getActiveSubscriptionIds()
+        subscriptions.ifEmpty { listOf(255) }.forEach { sub ->
+            val telephony = NetMonsterFactory.getTelephony(context, sub)
+            dataToShare += "\n\nNetworkOperator$sub\n${
+                telephony.getNetworkOperator()
+            }"
+            dataToShare += "\n\nRawCellInfo$sub\n${
+                telephony.getAllCellInfo().joinToString(separator = "\n")
+            }"
+            dataToShare += "\n\nRawCellLocation$sub\n${
+                telephony.getCellLocation().joinToString(separator = "\n")
+            }"
+        }
+        for(x in  CellPostprocessor.values().toList()) {
+            NetMonsterFactory.get(this).apply {
+                val merged = getCells(CellSource.ALL_CELL_INFO, postprocessors = listOf(x))
+                dataToShare += "\n\nPostProcessor${x.name}\n${
+                    merged.filter {
+                        it.connectionStatus == PrimaryConnection()
+                    }.joinToString(separator = "\n")
+                }"
+            }
+        }
+        return dataToShare
+    }
 }
