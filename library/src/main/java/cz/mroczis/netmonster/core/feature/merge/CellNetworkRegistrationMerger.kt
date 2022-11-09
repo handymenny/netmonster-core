@@ -10,7 +10,7 @@ import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 class CellNetworkRegistrationMerger {
 
     fun merge(existing: List<ICell>, nriCells: List<ICell>): List<ICell> {
-        val toAdd = nriCells.filterNot { cell -> existing containsSimilar cell }
+        val toAdd = nriCells.filterNot { cell -> cell.hasInvalidCI() || existing containsSimilar cell }
         return existing + toAdd
     }
 
@@ -37,4 +37,15 @@ class CellNetworkRegistrationMerger {
         } else false
     }
 
+    private fun ICell.hasInvalidCI(): Boolean {
+        return when (this) {
+            is CellGsm -> this.cid == null
+            is CellWcdma -> this.ci == null
+            is CellLte -> this.eci == null
+            is CellNr -> this.nci == null
+            is CellCdma -> this.bid == null
+            is CellTdscdma -> this.ci == null
+            else -> true
+        }
+    }
 }
