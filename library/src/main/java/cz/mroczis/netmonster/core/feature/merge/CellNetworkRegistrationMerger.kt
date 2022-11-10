@@ -17,9 +17,8 @@ class CellNetworkRegistrationMerger {
     private infix fun List<ICell>.containsSimilar(other: ICell) = any { candidate ->
         if (candidate.subscriptionId == other.subscriptionId) {
             val bothPrimaryConnection = candidate.connectionStatus is PrimaryConnection && other.connectionStatus is PrimaryConnection
-            val sameNetworkGeneration = candidate.javaClass == other.javaClass
 
-            if (bothPrimaryConnection && sameNetworkGeneration) {
+            if (bothPrimaryConnection) {
                 // Happens when data are not synced across the system - multiple primary cells are reported at the same time
                 // in such case ignore network registration source
                 return true
