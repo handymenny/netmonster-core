@@ -138,10 +138,16 @@ internal class NetMonster(
         } else emptyList()
 
         val networkRegistrationApi = if (CellSource.NETWORK_REGISTRATION_INFO in sources) {
-            subscriptions.mapNotNull { subId ->
+            var regCells = subscriptions.mapNotNull { subId ->
                 getTelephony(subId).getServiceState()?.toCells(subId)
             }.flatten().toSet().toList()
 
+            this.postprocessors.filter {
+                postprocessors.contains(it.id) && it.id == CellPostprocessor.SIGNAL_STRENGTH_POSTPROCESSOR
+            }.forEach {
+                regCells = it.postprocess(regCells)
+            }
+            regCells
         } else emptyList()
 
         val mergedOldNew = oldAndNewCellMerger.merge(oldApi, newApi, context.isDisplayOn(), subscriptions)
