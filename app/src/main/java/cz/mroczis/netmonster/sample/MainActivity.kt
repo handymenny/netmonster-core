@@ -4,6 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -39,7 +42,9 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val adapter = MainAdapter()
     private lateinit var dao: CellDao
-    val scope = CoroutineScope(Job() + Dispatchers.IO)
+    private lateinit var locationManager: LocationManager
+    private lateinit var geocoder: Geocoder
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
 
     private lateinit var binding: ActivityMainBinding
@@ -48,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         dao = AppDatabase.getDatabase(this).cellDao()
+        locationManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+        geocoder = Geocoder(this)
         with(binding) {
             setContentView(root)
             recycler.adapter = adapter
@@ -90,10 +97,24 @@ class MainActivity : AppCompatActivity() {
             val merged = getCells()
             adapter.data = merged
             scope.launch {
+                val location = getBestProvider()?.let {
+                    locationManager.getLastKnownLocation(it)
+                }
+                var address: Address? = null
+                if (location != null) {
+                    try {
+                        address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                            ?.firstOrNull()
+                    } catch (_: Exception) { }
+                }
                 val cellsToStore = merged.filter {
                     it.connectionStatus == PrimaryConnection()
-                }.mapNotNull {
-                    Cell.valueOf(it)
+                }.mapNotNull { iCell ->
+                    Cell.valueOf(iCell).also {
+                        it?.latitude = location?.latitude
+                        it?.longitude = location?.longitude
+                        it?.location = address?.getAddressLine(0)
+                    }
                 }
                 dao.insertAll(cellsToStore)
             }
@@ -139,5 +160,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return dataToShare
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun getBestProvider(): String? {
+        // Simple way to get the provider that most likely has an updated location
+        val providers = locationManager.getProviders(true)
+        if (providers.contains(LocationManager.FUSED_PROVIDER)) {
+            return LocationManager.FUSED_PROVIDER
+        } else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+            return LocationManager.NETWORK_PROVIDER
+        } else if (providers.contains(LocationManager.GPS_PROVIDER)) {
+            return LocationManager.GPS_PROVIDER
+        }
+        return null
     }
 }
