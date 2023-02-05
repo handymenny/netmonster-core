@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.telephony.ServiceState
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +17,15 @@ import cz.mroczis.netmonster.core.factory.NetMonsterFactory
 import cz.mroczis.netmonster.core.feature.merge.CellSource
 import cz.mroczis.netmonster.core.feature.postprocess.CellPostprocessor
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
+import cz.mroczis.netmonster.sample.MainActivity.Companion.REFRESH_RATIO
 import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
+import cz.mroczis.netmonster.sample.storage.AppDatabase
+import cz.mroczis.netmonster.sample.storage.Cell
+import cz.mroczis.netmonster.sample.storage.CellDao
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
  * Activity periodically updates data (once in [REFRESH_RATIO] ms) when it's on foreground.
@@ -31,13 +38,16 @@ class MainActivity : AppCompatActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private val adapter = MainAdapter()
+    private lateinit var dao: CellDao
+    val scope = CoroutineScope(Job() + Dispatchers.IO)
+
 
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-
+        dao = AppDatabase.getDatabase(this).cellDao()
         with(binding) {
             setContentView(root)
             recycler.adapter = adapter
@@ -79,7 +89,14 @@ class MainActivity : AppCompatActivity() {
         NetMonsterFactory.get(this).apply {
             val merged = getCells()
             adapter.data = merged
-
+            scope.launch {
+                val cellsToStore = merged.filter {
+                    it.connectionStatus == PrimaryConnection()
+                }.mapNotNull {
+                    Cell.valueOf(it)
+                }
+                dao.insertAll(cellsToStore)
+            }
             Log.d("NTM-RES", " \n${merged.joinToString(separator = "\n")}")
         }
     }
