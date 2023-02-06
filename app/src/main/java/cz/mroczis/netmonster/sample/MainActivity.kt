@@ -16,15 +16,15 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.postDelayed
+import com.google.gson.GsonBuilder
 import cz.mroczis.netmonster.core.factory.NetMonsterFactory
-import cz.mroczis.netmonster.core.feature.merge.CellSource
-import cz.mroczis.netmonster.core.feature.postprocess.CellPostprocessor
 import cz.mroczis.netmonster.core.model.connection.PrimaryConnection
 import cz.mroczis.netmonster.sample.MainActivity.Companion.REFRESH_RATIO
 import cz.mroczis.netmonster.sample.databinding.ActivityMainBinding
 import cz.mroczis.netmonster.sample.storage.AppDatabase
 import cz.mroczis.netmonster.sample.storage.Cell
 import cz.mroczis.netmonster.sample.storage.CellDao
+import cz.mroczis.netmonster.sample.storage.NetmonsterPost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -123,43 +123,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onShare() {
-        val shareText = Intent(Intent.ACTION_SEND)
-        shareText.type = "text/plain"
-        shareText.putExtra(Intent.EXTRA_SUBJECT, "netcore")
-        shareText.putExtra(Intent.EXTRA_TEXT, getDataToShare())
-        startActivity(Intent.createChooser(shareText, "Share"))
+        scope.launch {
+            val shareText = Intent(Intent.ACTION_SEND)
+            shareText.type = "text/plain"
+            shareText.putExtra(Intent.EXTRA_SUBJECT, "netcore")
+            shareText.putExtra(Intent.EXTRA_TEXT, getDataToShare())
+            startActivity(Intent.createChooser(shareText, "Share"))
+        }
     }
 
     @SuppressLint("MissingPermission")
     private fun getDataToShare(): String {
-        val context = this
-        var dataToShare = "NetmonsterPostProcess\n${
-            adapter.data.joinToString(separator = "\n")
-        }"
-        val subscriptions = NetMonsterFactory.getSubscription(context).getActiveSubscriptionIds()
-        subscriptions.ifEmpty { listOf(255) }.forEach { sub ->
-            val telephony = NetMonsterFactory.getTelephony(context, sub)
-            dataToShare += "\n\nNetworkOperator$sub\n${
-                telephony.getNetworkOperator()
-            }"
-            dataToShare += "\n\nRawCellInfo$sub\n${
-                telephony.getAllCellInfo().joinToString(separator = "\n")
-            }"
-            dataToShare += "\n\nRawCellLocation$sub\n${
-                telephony.getCellLocation().joinToString(separator = "\n")
-            }"
-        }
-        for(x in  CellPostprocessor.values().toList()) {
-            NetMonsterFactory.get(this).apply {
-                val merged = getCells(CellSource.ALL_CELL_INFO, postprocessors = listOf(x))
-                dataToShare += "\n\nPostProcessor${x.name}\n${
-                    merged.filter {
-                        it.connectionStatus == PrimaryConnection()
-                    }.joinToString(separator = "\n")
-                }"
-            }
-        }
-        return dataToShare
+        return GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+            .toJson(
+                NetmonsterPost(
+                    dao.getAll()
+                )
+            )
     }
 
     @SuppressLint("InlinedApi")
