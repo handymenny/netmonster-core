@@ -3,10 +3,12 @@ package cz.mroczis.netmonster.sample.storage
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.gson.annotations.JsonAdapter
 import cz.mroczis.netmonster.core.Milliseconds
 import cz.mroczis.netmonster.core.model.cell.*
 
 @Entity(indices = [Index(value = ["network", "technology", "cid"], unique = true)])
+@JsonAdapter(CellAdapter::class)
 data class Cell(
     val area: Int?,
     val caught: Milliseconds,
