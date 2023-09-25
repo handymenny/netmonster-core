@@ -68,7 +68,7 @@ class PrimaryCellPostprocessor : ICellPostprocessor {
             cell.cid != null && cell.tac != null && cell.pci != null
 
         override fun processNr(cell: CellNr) =
-            cell.nci != null && cell.tac != null && cell.pci != null
+            cell.nci != null && (cell.tac != null || cell.pci != null)
 
         override fun processTdscdma(cell: CellTdscdma) =
             cell.cid != null && cell.lac != null && cell.cpid != null
