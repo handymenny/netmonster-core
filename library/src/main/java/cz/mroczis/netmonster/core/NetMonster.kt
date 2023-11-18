@@ -77,6 +77,7 @@ internal class NetMonster(
             setValidTaDetected = { id -> storage.setReportsLteTimingAdvance(id, true) },
             wasValidTaDetected = { id -> storage.getReportsLteTimingAdvance(id) }
         ),
+        RssiPostprocessor()
     )
 
     @WorkerThread

@@ -72,5 +72,10 @@ enum class CellPostprocessor {
     /**
      *  Corresponds to [TimingAdvancePostprocessor]
      */
-    TIMINIG_ADVANCE_POSTPROCESSOR
+    TIMINIG_ADVANCE_POSTPROCESSOR,
+
+    /**
+     *  Corresponds to [RSSI_POSTPROCESSOR]
+     */
+    RSSI_POSTPROCESSOR
 }
