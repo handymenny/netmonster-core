@@ -110,7 +110,10 @@ data class CellLte(
          * Smallest possible bandwidth for LTE - 1.4 MHz
          */
         const val BANDWIDTH_MIN = 1_400L
-        const val BANDWIDTH_MAX = 100_000L
+        /**
+         * Max possible bandwidth for LTE - 20 MHz
+         */
+        const val BANDWIDTH_MAX = 20_000L
 
         internal val CID_RANGE = CID_MIN..CID_MAX
         internal val TAC_RANGE = TAC_MIN..TAC_MAX
